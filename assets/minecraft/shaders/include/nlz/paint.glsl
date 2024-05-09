@@ -49,13 +49,8 @@ vec4 introWave(vec2 uv, float t, vec4 color) {
 }
 
 
-bool drawCircle(vec2 center, float radius, vec2 point, float rotation) {
-    vec2 rotatedPoint = vec2(
-        point.x * cos(rotation) - point.y * sin(rotation),
-        point.x * sin(rotation) + point.y * cos(rotation)
-    );
-    
-    float dist = length(rotatedPoint - center);
+bool drawCircle(vec2 center, float radius, vec2 point) {
+    float dist = length(point - center);
     
     return dist <= radius;
 }
@@ -133,7 +128,7 @@ vec2 translate(vec2 point, vec2 translation) {
 }
 
 vec2 scale(vec2 point, vec2 scale) {
-    return point * scale;
+    return point * (1./scale);
 }
 
 
@@ -163,6 +158,45 @@ bool drawVerartLogoLeft(vec2 uv) {
     );
 }
 
+bool drawVerartLogoLeftBg(vec2 uv) {
+    return ( // ruler shadow
+        drawRoundedRectangle(vec2(0., 0.), vec2(1.280, 0.363), uv, 0., 0.135)
+        || drawRectangle(vec2(-0.15, -0.4), vec2(1.580, 0.75), uv, 0.)
+    );
+}
+
+bool drawVerartLogoRightBrushCurve(vec2 uv) {
+    // f\left(x\right)=-5.8281\times10^{7}x^{9}+-6.94408x^{2}+0.0259449x+0.188096
+    float fy = -5.8281e7*pow(uv.x, 9.) - 6.94408*pow(uv.x, 2.) + 0.0259449*uv.x + 0.188096;
+
+    return (
+        uv.x > 0. && uv.y > 0.
+        && uv.y < fy
+
+    );
+}
+
+bool drawVerartLogoRightBrush(vec2 uv) {
+    return (
+        drawCircle(vec2(0., 0.), 0.106, uv)
+        || drawCircle(vec2(0.154, 0.), 0.0381, uv)
+        || (
+            drawRectangle(vec2(0.08, 0.), vec2(.1, 0.1), uv, radians(-6.43))
+            && !drawCircle(vec2(0.131, -0.0874), 0.05375, uv)
+        ) || drawVerartLogoRightBrushCurve(uv.yx)
+    );
+
+}
+
+bool drawVerartLogoRight(vec2 uv) {
+    return (
+        (
+            drawRoundedRectangle(vec2(-0.165, 0.), vec2(1., 0.210), uv, 0., 0.075)
+            && !drawRectangle(vec2(-.1, .125), vec2(1.2, 0.12), uv, radians(-6.43))
+        ) || drawVerartLogoRightBrush(translate(uv, vec2(-0.49,0.)))
+
+    );
+}
 
 
 
@@ -176,28 +210,38 @@ vec4 drawVerartLogo(vec2 uv) {
 
 
     // debug
-    if (
-        false
-    ) {
-        return vec4(1.0, 0.0, 0.0, 1.0);
-    }
-
+    // vec2 uvDebug = scale(translate(uv, vec2(0.,-.7)), vec2(2));
+    // if (
+    //     !drawVerartLogoRightBrush(uvDebug) &&
+    //     drawRectangle(vec2(0.08, 0.), vec2(.1, 0.1), uvDebug, radians(-6.43))
+    // ) {
+    //     return vec4(0.0, 0.0, 1.0, 1.0);
+    // }
 
 
 
     // logo
-    vec4 color = vec4(vec3(vec3(uv.x,uv.y, 0.)/2. + 0.5), 1.0);
+    // vec4 color = vec4(vec3(vec3(uv.x,uv.y, 0.)/2. + 0.5), 1.0);
+    vec4 color = vec4(0.0);
+    float spacing = 0.2;
 
-    vec2 uvLeft = rotate(translate(uv, vec2(0., .5)), radians(27.7));
+    vec2 uvLeft = rotate(translate(uv, vec2(0., spacing)), radians(27.7));
     if (drawVerartLogoLeft(uvLeft)) {
         return vec4(1.0);
     }
 
-    vec2 uvRight = rotate(translate(uv, vec2(0., -.5)), radians(-22.53));
-    if (drawVerartLogoLeft(uvRight)) {
+    vec2 uvRight = rotate(translate(uv, vec2(0.08, -spacing)), radians(-22.53));
+    if (!drawVerartLogoLeftBg(uvLeft) && drawVerartLogoRight(uvRight)) {
         return vec4(1.0);
     }
 
+    // if (!drawVerartLogoLeftBg(uvLeft) && drawVerartLogoRight(translate(uv, vec2(0.,-.8)))) {
+    //     return vec4(1.0);
+    // }
+
+    // if (drawVerartLogoRightBrush(uvDebug)) {
+    //     return vec4(1.0, 0.0, 0.0, 1.0);
+    // }
 
     return color;
 }
@@ -223,7 +267,7 @@ vec4 verart(vec2 ScreenSize, vec2 coord, vec4 ColorModulator, float t) {
 
     #ifdef MOJ_IMPORTED
     // transform3D
-    uv = -transform3D(uv, vec3(-1., 1., 0.), PI+(1.-(sin((PI/2.)*ColorModulator.a*.8+.2)))*0.4, 1.5);
+    uv = -transform3D(uv, vec3(-1., 1., 0.), PI+(1.-(sin((PI/2.)*ColorModulator.a*.8+.2)))*1.3, 1.5);
     #endif
 
     // logo
@@ -232,7 +276,7 @@ vec4 verart(vec2 ScreenSize, vec2 coord, vec4 ColorModulator, float t) {
         // fColor.xyz = vec3(uv.x,uv.y, 0.)/2. + 0.5;
 
         // logo
-        fColor = drawVerartLogo(uv);
+        fColor = colorBlend(fColor, drawVerartLogo(uv));
 
     }
 
