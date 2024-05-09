@@ -185,7 +185,6 @@ bool drawVerartLogoRightBrush(vec2 uv) {
             && !drawCircle(vec2(0.131, -0.0874), 0.05375, uv)
         ) || drawVerartLogoRightBrushCurve(uv.yx)
     );
-
 }
 
 bool drawVerartLogoRight(vec2 uv) {
@@ -194,32 +193,11 @@ bool drawVerartLogoRight(vec2 uv) {
             drawRoundedRectangle(vec2(-0.165, 0.), vec2(1., 0.210), uv, 0., 0.075)
             && !drawRectangle(vec2(-.1, .125), vec2(1.2, 0.12), uv, radians(-6.43))
         ) || drawVerartLogoRightBrush(translate(uv, vec2(-0.49,0.)))
-
     );
 }
 
 
-
-
-
 vec4 drawVerartLogo(vec2 uv) {
-    // correct shadertoy coordinate system
-    #ifndef MOJ_IMPORTED
-        uv = uv.yx;
-    #endif
-
-
-    // debug
-    // vec2 uvDebug = scale(translate(uv, vec2(0.,-.7)), vec2(2));
-    // if (
-    //     !drawVerartLogoRightBrush(uvDebug) &&
-    //     drawRectangle(vec2(0.08, 0.), vec2(.1, 0.1), uvDebug, radians(-6.43))
-    // ) {
-    //     return vec4(0.0, 0.0, 1.0, 1.0);
-    // }
-
-
-
     // logo
     // vec4 color = vec4(vec3(vec3(uv.x,uv.y, 0.)/2. + 0.5), 1.0);
     vec4 color = vec4(0.0);
@@ -235,14 +213,6 @@ vec4 drawVerartLogo(vec2 uv) {
         return vec4(1.0);
     }
 
-    // if (!drawVerartLogoLeftBg(uvLeft) && drawVerartLogoRight(translate(uv, vec2(0.,-.8)))) {
-    //     return vec4(1.0);
-    // }
-
-    // if (drawVerartLogoRightBrush(uvDebug)) {
-    //     return vec4(1.0, 0.0, 0.0, 1.0);
-    // }
-
     return color;
 }
 
@@ -252,7 +222,7 @@ vec4 verart(vec2 ScreenSize, vec2 coord, vec4 ColorModulator, float t) {
     vec2 uv = coord / ScreenSize;
     uv = uv * 2.0 - 1.0;
     vec2 uvn = uv;
-    
+
     if (ScreenSize.x > ScreenSize.y) uv.x *= ScreenSize.x / ScreenSize.y;
     else uv.y /= ScreenSize.x / ScreenSize.y;
     uv *= 1.42;
@@ -265,20 +235,13 @@ vec4 verart(vec2 ScreenSize, vec2 coord, vec4 ColorModulator, float t) {
     if (fColor == vec4(1.0) || fColor == vec4(0.0)) return fColor;
 
 
-    #ifdef MOJ_IMPORTED
     // transform3D
     uv = -transform3D(uv, vec3(-1., 1., 0.), PI+(1.-(sin((PI/2.)*ColorModulator.a*.8+.2)))*1.3, 1.5);
-    #endif
+
 
     // logo
-    if (uv.x > -1. && uv.y > -1. && uv.x < 1. && uv.y < 1.) {
-        // debug
-        // fColor.xyz = vec3(uv.x,uv.y, 0.)/2. + 0.5;
-
-        // logo
+    if (uv.x > -1. && uv.y > -1. && uv.x < 1. && uv.y < 1.) 
         fColor = colorBlend(fColor, drawVerartLogo(uv));
-
-    }
 
     return fColor;
 }
@@ -291,6 +254,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec2 ScreenSize = iResolution.xy;
     vec2 coord = fragCoord.xy;
     // fragColor = verart(ScreenSize, coord, vec4(1.0), iMouse.x/iResolution.x);
-    fragColor = verart(ScreenSize, coord, vec4(1.0), iTime/10.);
+    fragColor = verart(ScreenSize, coord, vec4(vec3(1.0), iMouse.x/iResolution.x), iTime/10.);
 }
 #endif
