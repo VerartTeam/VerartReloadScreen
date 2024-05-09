@@ -12,8 +12,6 @@ in float loadingScreen;
 out vec4 fragColor;
 
 #define MOJ_IMPORTED
-// #moj_i mport <nlz/logo.glsl>
-#moj_import <nlz/utils.glsl>
 #moj_import <nlz/paint.glsl>
 
 

@@ -1,6 +1,4 @@
-#ifndef PI
 #define PI 3.14159265359
-#endif
 #define SQRT_2 1.4142135624
 
 
