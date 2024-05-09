@@ -1,0 +1,5 @@
+.packignore
+.git/
+.gitignore
+*.zip
+scripts/
