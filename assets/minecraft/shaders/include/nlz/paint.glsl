@@ -50,109 +50,154 @@ vec4 introWave(vec2 uv, float t, vec4 color) {
 
 
 bool drawCircle(vec2 center, float radius, vec2 point, float rotation) {
-    // Apply rotation
     vec2 rotatedPoint = vec2(
         point.x * cos(rotation) - point.y * sin(rotation),
         point.x * sin(rotation) + point.y * cos(rotation)
     );
     
-    // Calculate distance from center
-    float distance = length(rotatedPoint - center);
+    float dist = length(rotatedPoint - center);
     
-    // Check if point is inside the circle
-    return distance <= radius;
+    return dist <= radius;
 }
 
 bool drawRectangle(vec2 center, vec2 size, vec2 point, float rotation) {
-    // Apply rotation
+    vec2 halfSize = size * 0.5;
+    vec2 translatedPoint = point - center;
+    
+    float cosTheta = cos(rotation);
+    float sinTheta = sin(rotation);
     vec2 rotatedPoint = vec2(
-        point.x * cos(rotation) - point.y * sin(rotation),
-        point.x * sin(rotation) + point.y * cos(rotation)
+        translatedPoint.x * cosTheta - translatedPoint.y * sinTheta,
+        translatedPoint.x * sinTheta + translatedPoint.y * cosTheta
     );
     
-    // Calculate half-size of rectangle
-    vec2 halfSize = size * 0.5;
+    rotatedPoint += center;
     
-    // Calculate AABB
+    // AABB check
     vec2 minBound = center - halfSize;
     vec2 maxBound = center + halfSize;
-    
-    // Check if point is inside AABB
+
     return rotatedPoint.x >= minBound.x && rotatedPoint.x <= maxBound.x &&
            rotatedPoint.y >= minBound.y && rotatedPoint.y <= maxBound.y;
 }
 
-bool drawSmoothRectangle(vec2 center, vec2 size, vec2 point, float rotation, float cornerRadius) {
-    // Apply rotation
-    vec2 rotatedPoint = vec2(
-        point.x * cos(rotation) - point.y * sin(rotation),
-        point.x * sin(rotation) + point.y * cos(rotation)
-    );
 
-    // Calculate half-size of rectangle
+bool drawRoundedRectangle(vec2 center, vec2 size, vec2 point, float rotation, float cornerRadius) {
     vec2 halfSize = size * 0.5;
+    vec2 translatedPoint = point - center;
     
-    // Calculate AABB
+    float cosTheta = cos(rotation);
+    float sinTheta = sin(rotation);
+    vec2 rotatedPoint = vec2(
+        translatedPoint.x * cosTheta - translatedPoint.y * sinTheta,
+        translatedPoint.x * sinTheta + translatedPoint.y * cosTheta
+    );
+    
+    rotatedPoint += center;
+    
+    // AABB check
     vec2 minBound = center - halfSize;
     vec2 maxBound = center + halfSize;
 
-    // Calculate distance from center
-    vec2 distance = abs(rotatedPoint - center);
+    if (rotatedPoint.x >= minBound.x && rotatedPoint.x <= maxBound.x &&
+        rotatedPoint.y >= minBound.y && rotatedPoint.y <= maxBound.y) {
+        
+        // test if in corners
+        if ((rotatedPoint.x < minBound.x + cornerRadius || rotatedPoint.x > maxBound.x - cornerRadius) &&
+            (rotatedPoint.y < minBound.y + cornerRadius || rotatedPoint.y > maxBound.y - cornerRadius)
+        ) {
+            // if (inCorner && inCircle)
+            return (length(rotatedPoint - vec2(minBound.x + cornerRadius, minBound.y + cornerRadius)) <= cornerRadius ||
+                length(rotatedPoint - vec2(maxBound.x - cornerRadius, minBound.y + cornerRadius)) <= cornerRadius ||
+                length(rotatedPoint - vec2(minBound.x + cornerRadius, maxBound.y - cornerRadius)) <= cornerRadius ||
+                length(rotatedPoint - vec2(maxBound.x - cornerRadius, maxBound.y - cornerRadius)) <= cornerRadius
+            );
+        }
 
-    // Check if point is inside the rectangle
-    if (distance.x <= halfSize.x && distance.y <= halfSize.y) {
         return true;
-    }
-
-    // Check if point is inside the corner
-    if (distance.x > halfSize.x - cornerRadius && distance.y > halfSize.y - cornerRadius) {
-        vec2 cornerDistance = distance - halfSize + vec2(cornerRadius);
-        return length(cornerDistance) <= cornerRadius;
-    }
-
-    // Check if point is inside the rounded corner
-    if (distance.x > halfSize.x - cornerRadius) {
-        vec2 cornerDistance = vec2(distance.x - halfSize.x + cornerRadius, distance.y - halfSize.y);
-        return length(cornerDistance) <= cornerRadius;
-    }
-
-    if (distance.y > halfSize.y - cornerRadius) {
-        vec2 cornerDistance = vec2(distance.x - halfSize.x, distance.y - halfSize.y + cornerRadius);
-        return length(cornerDistance) <= cornerRadius;
     }
 
     return false;
 }
 
 
+vec2 rotate(vec2 point, float angle) {
+    return vec2(
+        point.x * cos(angle) - point.y * sin(angle),
+        point.x * sin(angle) + point.y * cos(angle)
+    );
+}
+
+vec2 translate(vec2 point, vec2 translation) {
+    return point + translation;
+}
+
+vec2 scale(vec2 point, vec2 scale) {
+    return point * scale;
+}
+
+
+
+
+bool drawVerartLogoLeft(vec2 uv) {
+    return ( // ruler
+        drawRoundedRectangle(vec2(0., 0.), vec2(1.180, 0.263), uv, 0., 0.09)
+
+        && !(   // ruler indicators
+            drawRoundedRectangle(vec2(-0.18, 0.1), vec2(0.2, 0.053), uv, PI/2., 0.025) ||
+            drawRoundedRectangle(vec2(0.0, 0.1), vec2(0.2, 0.053), uv, PI/2., 0.025) ||
+            drawRoundedRectangle(vec2(0.18, 0.1), vec2(0.2, 0.053), uv, PI/2., 0.025) ||
+            drawRoundedRectangle(vec2(0.36, 0.1), vec2(0.2, 0.053), uv, PI/2., 0.025)
+
+            || (   // inner rounded ruler indicators
+                drawRectangle(vec2(0.1, 0.12), vec2(0.7, 0.08), uv, 0.)  //hide
+                && !(
+                    drawRoundedRectangle(vec2(0.09, 0.), vec2(0.13, 0.263), uv, 0., 0.025) ||
+                    drawRoundedRectangle(vec2(0.27, 0.), vec2(0.13, 0.263), uv, 0., 0.025) ||
+                    drawRoundedRectangle(vec2(0.45, 0.), vec2(0.13, 0.263), uv, 0., 0.025) ||
+                    drawRoundedRectangle(vec2(-0.09, 0.), vec2(0.13, 0.263), uv, 0., 0.025) ||
+                    drawRoundedRectangle(vec2(-0.27, 0.), vec2(0.13, 0.263), uv, 0., 0.025)
+                )
+            )
+        )
+    );
+}
+
+
+
+
+
 
 vec4 drawVerartLogo(vec2 uv) {
+    // correct shadertoy coordinate system
     #ifndef MOJ_IMPORTED
-    uv = uv.yx;
+        uv = uv.yx;
     #endif
+
+
+    // debug
+    if (
+        false
+    ) {
+        return vec4(1.0, 0.0, 0.0, 1.0);
+    }
+
+
+
 
     // logo
     vec4 color = vec4(vec3(vec3(uv.x,uv.y, 0.)/2. + 0.5), 1.0);
 
-    // circle
-    // if (drawCircle(vec2(0.0, 0.0), 0.5, uv, 0.0)) {
-    //     return vec4(1.0);
-    // }
-
-    // rectangle
-    // if (drawRectangle(vec2(0.0, 0.0), vec2(1.5, 0.5), uv, PI/4.)) {
-    //     return vec4(1.0);
-    // }
-
-    // smooth rectangle
- 
-    if (drawSmoothRectangle(vec2(0.0, 0.0), vec2(0.27, 1.1892), uv, PI/2., 1.)) {
+    vec2 uvLeft = rotate(translate(uv, vec2(0., .5)), radians(27.7));
+    if (drawVerartLogoLeft(uvLeft)) {
         return vec4(1.0);
     }
 
-    if (drawRectangle(vec2(-.5, 0.0), vec2(0.27, 1.1892), uv, PI/2.)) {
+    vec2 uvRight = rotate(translate(uv, vec2(0., -.5)), radians(-22.53));
+    if (drawVerartLogoLeft(uvRight)) {
         return vec4(1.0);
     }
+
 
     return color;
 }
