@@ -253,7 +253,7 @@ bool drawPropsSplash(vec2 center, vec2 size, vec2 uv, float rotation, float dt, 
             translate(iuv, vec2(mod(rand(i), 0.2), mod(rand(i+1), 0.1)-.05)),
             vec2(0.2* cosInterpolate(0., 1., delay(dt, 0.8)), 0.)
         );
-        iuv = scale(iuv, size* cosInterpolate(0., 1., delay(dt, 0.5)));
+        iuv = scale(iuv, size* cosInterpolate(0., 1., delay(dt, 0.8)));
 
 
         if (drawRandomProp(iuv, i)) return true;
