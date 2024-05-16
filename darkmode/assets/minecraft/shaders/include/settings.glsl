@@ -1,0 +1,1 @@
+#define RELOAD_DARK_MODE 1

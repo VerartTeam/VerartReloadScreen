@@ -1,6 +1,9 @@
 {
-  "pack": {
-    "pack_format": 22,
-    "description": "VerartReload by Neylz"
-  }
+	"name": "VerartReload",
+	"version": "1.0.0",
+	"pack": {
+		"pack_format": 22,
+		"supported_formats": [22, 33],
+		"description": "VerartReload by Neylz"
+	}
 }
