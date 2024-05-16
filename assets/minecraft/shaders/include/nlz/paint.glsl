@@ -1,6 +1,11 @@
 #define PI 3.14159265359
 #define SQRT_2 1.4142135624
 
+#ifndef RELOAD_DARK_MODE
+    #define RELOAD_DARK_MODE 0
+#endif
+
+
 float rand(float n){return fract(sin(n) * 43758.5453123);}
 float rand(int n){return rand(float(n));}
 
@@ -296,6 +301,8 @@ vec4 drawVerartLogo(vec2 uv, float cma, float t) {
     float spacing = 0.2;
     float delta = -(1.-cma)*0.1;
 
+    
+
     float leftRotDelta = cosInterpolate(0., delta*250., cma);
     vec2 uvLeft = rotate(translate(uv, vec2(0.-delta*.3, spacing-delta*0.5)), radians(27.7-leftRotDelta));
     if (drawVerartLogoLeft(uvLeft)) {
@@ -323,14 +330,21 @@ vec4 verart(vec2 ScreenSize, vec2 coord, vec4 ColorModulator, float t) {
     uv *= 1.42;
 
     // bg
-    vec4 fColor = vec4(mix(vec3(0, 0.69, .96),vec3(0, 0.92, 0.94), distance(uvn, vec2(-1,1))/(2.*SQRT_2)), ColorModulator.a);
+    #if RELOAD_DARK_MODE == 0
+        vec4 fColor = vec4(mix(vec3(0, 0.69, .96),vec3(0, 0.92, 0.94), distance(uvn, vec2(-1,1))/(2.*SQRT_2)), ColorModulator.a);
+    #else
+        vec4 fColor = vec4(0., 0.02, 0., ColorModulator.a);
+    #endif
+
 
     // intro wave
     fColor = introWave(uvn/2.+.5, ColorModulator.a, fColor);
     if (fColor == vec4(1.0) || fColor == vec4(0.0)) return fColor;
 
     // props
-    fColor = colorBlend(fColor, drawVerartProps(uv, ColorModulator.a, t));
+    #if RELOAD_DARK_MODE == 0
+        fColor = colorBlend(fColor, drawVerartProps(uv, ColorModulator.a, t));
+    #endif
 
 
     // transform3D
@@ -339,6 +353,10 @@ vec4 verart(vec2 ScreenSize, vec2 coord, vec4 ColorModulator, float t) {
     // logo
     // if (uv.x > -1. && uv.y > -1. && uv.x < 1. && uv.y < 1.) 
     fColor = colorBlend(fColor, drawVerartLogo(uv, ColorModulator.a, t));
+
+    #if RELOAD_DARK_MODE == 1
+        fColor *= vec4(mix(vec3(0.29, 0.91, 1.),vec3(0.18, 0.57, 0.99), distance(uv, vec2(-1,1))/(2.*SQRT_2)), 1.0);
+    #endif
     
 
     return fColor;
