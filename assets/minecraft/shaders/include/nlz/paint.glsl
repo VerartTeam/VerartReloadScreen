@@ -258,6 +258,7 @@ bool drawPropsSplash(vec2 center, vec2 size, vec2 uv, float rotation, float dt, 
 
         if (drawRandomProp(iuv, i)) return true;
     }
+    return false;
 }
 
 vec2 propsSplashPos[6] = vec2[6](
@@ -338,7 +339,6 @@ vec4 verart(vec2 ScreenSize, vec2 coord, vec4 ColorModulator, float t) {
     // logo
     // if (uv.x > -1. && uv.y > -1. && uv.x < 1. && uv.y < 1.) 
     fColor = colorBlend(fColor, drawVerartLogo(uv, ColorModulator.a, t));
-    
     
 
     return fColor;
