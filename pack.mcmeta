@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"pack": {
 		"pack_format": 22,
-		"supported_formats": [22, 33],
+		"supported_formats": [22, 34],
 		"description": "VerartReload by Neylz"
 	}
 }

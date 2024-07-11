@@ -1,7 +1,7 @@
 {
 	"pack": {
 		"pack_format": 22,
-		"supported_formats": [22, 33],
+		"supported_formats": [22, 34],
 		"description": "VerartReload Darkmode by Neylz"
 	}
 }
