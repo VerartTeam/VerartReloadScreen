@@ -1,6 +1,6 @@
 {
 	"name": "VerartReload",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"pack": {
 		"pack_format": 22,
 		"supported_formats": [22, 34],
